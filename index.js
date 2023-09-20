@@ -1,3 +1,4 @@
+process.stdin.setMaxListeners(20);
 const mysql = require('mysql2');
 
 const db = mysql.createConnection({
@@ -8,8 +9,7 @@ const db = mysql.createConnection({
 });
 
 const inquirer = require('inquirer');
-const mysql = require('mysql2');
-const Database = require('db-queries');
+const Database = require('./queries');
 const queryDB = new Database();
 
 
@@ -18,20 +18,8 @@ db.connect((err) => {
         console.error('Error connecting to the database: ' + err.stack);
     return;
     }
-    console.log('Connected to the database as ID ' + db.threadId);
+    // console.log('Connected to the database as ID ' + db.threadId);
 });
-
-
-queryDB.getAllDepartments()
-
-    .then((departments) => {
-    console.log(departments);
-    })
-
-    .catch((error) => {
-    console.error(error);
-    });
-
 
 function mainMenu() {
     inquirer
@@ -55,45 +43,218 @@ function mainMenu() {
         
         .then((answers) => {
             
-            // handle user's choice
             switch (answers.menuChoice) {
                 case 'View all departments':
-                // function to view all departments
+                    queryDB.getAllDepartments()
+                    .then((departments) => {
+                        console.table(departments);
+                        mainMenu();
+                    })
+                    .catch((error) => {
+                        console.error('Error viewing departments:', error);
+                        console.log('An error occurred.  Exiting the application.');
+                        db.end();
+                        return;
+                    });
                 break;
 
                 case 'View all roles':
-                // function to view all roles
+                    queryDB.getAllRoles()
+                    .then((roles) => {
+                        console.table(roles);
+                        mainMenu();
+                    })
+                    .catch((error) => {
+                        console.error('Error viewing roles:', error);
+                        console.log('An error occurred.  Exiting the application.');
+                        db.end();
+                        return;
+                    });
                 break;
                 
                 case 'View all employees':
-                // function to view all employees
+                    queryDB.getAllEmployees()
+                    .then((employees) => {
+                        console.table(employees);
+                    mainMenu();
+                    })
+                    .catch((error) => {
+                        console.error('Error viewing employees:', error);
+                        console.log('An error occurred.  Exiting the application.');
+                        db.end();
+                        return;
+                    });
                 break;
                 
                 case 'Add a department':
-                // function to add a department
+                    inquirer
+                        .prompt([
+                            {
+                                type: 'input',
+                                name: 'departmentName',
+                                message: 'Enter the name of the department:'
+                            }
+                        ])
+                        .then((answers) => {
+                            return queryDB.addDepartment(answers.departmentName);
+                        })
+                        
+                        .then(() => {
+                            console.log('Department added!');
+                            mainMenu();
+                        })
+                        .catch((error) => {
+                            console.error('Error adding department:', error);
+                            console.log('An error occurred.  Exiting the application.');
+                            db.end();
+                            return;
+                        });
                 break;
                 
                 case 'Add a role':
-                // function to add a role
+                    inquirer
+                        .prompt([
+                            {
+                                type: 'input',
+                                name: 'roleName',
+                                message: 'Enter the name of the new role:'
+                            },
+                            {
+                                type: 'input',
+                                nameL 'salary',
+                                message: 'Enter the salary for this new role:'
+                            },
+                            {
+                                type: 'input',
+                                name: 'department_id',
+                                message: "Enter the department ID for this new role:"
+                            }
+                        ])
+                        .then((answers) => {
+                            return queryDB.addRole(answers.roleName);
+                        })
+                        
+                        .then(() => {
+                            console.log('Role added!');
+                            mainMenu();
+                        })
+                        .catch((error) => {
+                            console.error('Error adding role:', error);
+                            console.log('An error occurred.  Exiting the application.');
+                            db.end();
+                            return;
+                        });
                 break;
                 
                 case 'Add an employee':
-                // function to add an employee
+                    inquirer
+                        .prompt([
+                            {
+                                type: 'input',
+                                name: 'firstName',
+                                message: 'Enter the first name of the employee:'
+                            },
+                            {
+                                type: 'input',
+                                name: 'lastName',
+                                message: 'Enter the last name of the employee:'
+                            },
+                            {
+                                type: 'input',
+                                name: 'role_id',
+                                message: 'Enter the role ID for the new employee:'
+                            },
+                            {
+                                type: 'input',
+                                name: 'manager_id',
+                                message: "Enter the manager ID for the new employee:"
+                            }
+                        ])
+                        .then((answers) => {
+                            return queryDB.addEmployee(answers.employeeName);
+                        })
+                        
+                        .then(() => {
+                            console.log('Employee added!');
+                            mainMenu();
+                        })
+                        .catch((error) => {
+                            console.error('Error adding employee:', error);
+                            console.log('An error occurred.  Exiting the application.');
+                            db.end();
+                            return;
+                        });
                 break;
                 
                 case 'Update an employee role':
-                // function to update an employee's role
+
+                queryDB.getAllEmployees()
+                .then((employees) => {
+                    const employeeChoices = employees.map((employee) => ({
+                        name: `${employee.first_name} ${employee.last_name}`,
+                        value: employee.id,
+                    }));
+
+                queryDB.getAllRoles()
+                .then((roles) => {
+                    const roleChoices = roles.map((role) => ({
+                        name: role.title,
+                        value: role.id,
+                    }));
+                })
+
+                    inquirer
+                    .prompt([
+                        {
+                            type: 'list',
+                            name: 'employeeID',
+                            message: 'Select an employee to update:',
+                            choices: employeeChoices,
+                        },
+                        {
+                            type: 'list',
+                            name: 'newRoleID',
+                            message: 'Select a new role for the employee:',
+                            choices: roleChoices,
+                        },
+                    ])
+                    .then((answers) => {
+                        queryDB.updateEmployeeRole(answers.employeeID, answers.newRoleID)
+                        .then(() => {
+                            console.log('Employee role updated!');
+                            mainMenu();
+                        })
+                        .catch((error) => {
+                            console.error('Error update employee role:', error);
+                            console.log('An error occurred.  Exiting the application.');
+                            db.end();
+                            return;
+                        });
+                    });
+                })
+
+                .catch((error) => {
+                    console.error('Error getting employee list:', error);
+                    console.log('An error occurred.  Exiting the application.');
+                    db.end();
+                    return;
+                })
+
+                .catch((error) => {
+                    console.error('Error getting roles list:', error);
+                    console.log('An error occurred.  Exiting the application.');
+                    db.end();
+                    return;
+                });
+
                 break;
                 
                 case 'Exit':
-                    // Close the database connection
                 console.log('Goodbye!');
                 db.end(); 
                 return;
             }
 
-            // call mainMenu() again after each action to display the menu again
-            mainMenu();
             })
             
             .catch((error) => {
