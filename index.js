@@ -22,6 +22,9 @@ db.connect((err) => {
 });
 
 function mainMenu() {
+
+    let roleChoices;
+
     inquirer
         .prompt([
         {
@@ -110,151 +113,186 @@ function mainMenu() {
                             return;
                         });
                 break;
-                
+
                 case 'Add a role':
+                    queryDB.getAllDepartments()
+                        .then((departments) => {
+                            const departmentChoices = departments.map((department) => ({
+                            name: department.name,
+                            value: department.id,
+                            }));
+
                     inquirer
                         .prompt([
                             {
                                 type: 'input',
                                 name: 'roleName',
-                                message: 'Enter the name of the new role:'
+                                message: 'Enter the name of the new role:',
                             },
                             {
                                 type: 'input',
-                                nameL 'salary',
-                                message: 'Enter the salary for this new role:'
+                                name: 'roleSalary',
+                                message: 'Enter the salary for this new role:',
+                                validate: function (input) {
+                                return !isNaN(parseFloat(input)) && isFinite(input) ? true : 'Please enter a valid number for salary.';
+                            },
                             },
                             {
-                                type: 'input',
-                                name: 'department_id',
-                                message: "Enter the department ID for this new role:"
-                            }
+                                type: 'list',
+                                name: 'roleDepartmentID',
+                                message: 'Select the department for this new role:',
+                                choices: departmentChoices,
+                            },
                         ])
                         .then((answers) => {
-                            return queryDB.addRole(answers.roleName);
+                            return queryDB.addRole(answers.roleName, answers.roleSalary, answers.roleDepartmentID);
                         })
-                        
                         .then(() => {
                             console.log('Role added!');
                             mainMenu();
                         })
                         .catch((error) => {
                             console.error('Error adding role:', error);
-                            console.log('An error occurred.  Exiting the application.');
+                            console.log('An error occurred. Exiting the application.');
                             db.end();
                             return;
                         });
-                break;
-                
-                case 'Add an employee':
-                    inquirer
-                        .prompt([
-                            {
-                                type: 'input',
-                                name: 'firstName',
-                                message: 'Enter the first name of the employee:'
-                            },
-                            {
-                                type: 'input',
-                                name: 'lastName',
-                                message: 'Enter the last name of the employee:'
-                            },
-                            {
-                                type: 'input',
-                                name: 'role_id',
-                                message: 'Enter the role ID for the new employee:'
-                            },
-                            {
-                                type: 'input',
-                                name: 'manager_id',
-                                message: "Enter the manager ID for the new employee:"
-                            }
-                        ])
-                        .then((answers) => {
-                            return queryDB.addEmployee(answers.employeeName);
                         })
-                        
-                        .then(() => {
-                            console.log('Employee added!');
-                            mainMenu();
-                        })
-                        .catch((error) => {
-                            console.error('Error adding employee:', error);
-                            console.log('An error occurred.  Exiting the application.');
-                            db.end();
-                            return;
-                        });
-                break;
-                
-                case 'Update an employee role':
-
-                queryDB.getAllEmployees()
-                .then((employees) => {
-                    const employeeChoices = employees.map((employee) => ({
-                        name: `${employee.first_name} ${employee.last_name}`,
-                        value: employee.id,
-                    }));
-
-                queryDB.getAllRoles()
-                .then((roles) => {
-                    const roleChoices = roles.map((role) => ({
-                        name: role.title,
-                        value: role.id,
-                    }));
-                })
-
-                    inquirer
-                    .prompt([
-                        {
-                            type: 'list',
-                            name: 'employeeID',
-                            message: 'Select an employee to update:',
-                            choices: employeeChoices,
-                        },
-                        {
-                            type: 'list',
-                            name: 'newRoleID',
-                            message: 'Select a new role for the employee:',
-                            choices: roleChoices,
-                        },
-                    ])
-                    .then((answers) => {
-                        queryDB.updateEmployeeRole(answers.employeeID, answers.newRoleID)
-                        .then(() => {
-                            console.log('Employee role updated!');
-                            mainMenu();
-                        })
-                        .catch((error) => {
-                            console.error('Error update employee role:', error);
-                            console.log('An error occurred.  Exiting the application.');
-                            db.end();
-                            return;
-                        });
+                    
+                    .catch((error) => {
+                        console.error('Error getting departments list:', error);
+                        console.log('An error occurred. Exiting the application.');
+                        db.end();
+                        return;
                     });
-                })
-
-                .catch((error) => {
-                    console.error('Error getting employee list:', error);
-                    console.log('An error occurred.  Exiting the application.');
-                    db.end();
-                    return;
-                })
-
-                .catch((error) => {
-                    console.error('Error getting roles list:', error);
-                    console.log('An error occurred.  Exiting the application.');
-                    db.end();
-                    return;
-                });
-
                 break;
+
+                case 'Add an employee':
+                    queryDB.getAllRoles()
+                        .then((roles) => {
+                            roleChoices = roles.map((role) => ({
+                                name: role.title,
+                                value: role.id,
+                            }));
+                            return queryDB.getAllEmployees();
+                        })
+                        .then((employees) => {
+                            const employeeChoices = employees.map((employee) => ({
+                                name: `${employee.first_name} ${employee.last_name}`,
+                                value: employee.id,
+                            }));
+
+                            inquirer
+                                .prompt([
+                                    {
+                                        type: 'input',
+                                        name: 'firstName',
+                                        message: 'Enter the first name of the new employee:',
+                                    },
+                                    {
+                                        type: 'input',
+                                        name: 'lastName',
+                                        message: 'Enter the last name of the new employee:',
+                                    },
+                                    {
+                                        type: 'list', 
+                                        name: 'roleId',
+                                        message: 'Select the role for the new employee:',
+                                        choices: roleChoices, 
+                                    },
+                                    {
+                                        type: 'list', 
+                                        name: 'managerId',
+                                        message: 'Select the manager for the new employee:',
+                                        choices: employeeChoices,
+                                    },
+                                ])
+                                .then((answers) => {
+                                    return queryDB.addEmployee(
+                                        answers.firstName,
+                                        answers.lastName,
+                                        answers.roleId,
+                                        answers.managerId
+                                    );
+                                })
+                                .then(() => {
+                                    console.log('Employee added!');
+                                    mainMenu();
+                                })
+                                .catch((error) => {
+                                    console.error('Error adding employee:', error);
+                                    console.log('An error occurred. Exiting the application.');
+                                    db.end();
+                                });
+                        })
+                        .catch((error) => {
+                            console.error('Error getting employee list:', error);
+                            console.log('An error occurred. Exiting the application.');
+                            db.end();
+                        });
+                    break;
+
+                    case 'Update an employee role':
+                        queryDB.getAllEmployees()
+                            .then((employees) => {
+                                const employeeChoices = employees.map((employee) => ({
+                                    name: `${employee.first_name} ${employee.last_name}`,
+                                    value: employee.id,
+                                }));
+
+                                queryDB.getAllRoles()
+                                    .then((roles) => {
+                                        const roleChoices = roles.map((role) => ({
+                                            name: role.title,
+                                            value: role.id,
+                                        }));
+
+                                        inquirer
+                                            .prompt([
+                                                {
+                                                    type: 'list',
+                                                    name: 'employeeID',
+                                                    message: 'Select an employee to update:',
+                                                    choices: employeeChoices,
+                                                },
+                                                {
+                                                    type: 'list',
+                                                    name: 'newRoleID',
+                                                    message: 'Select a new role for the employee:',
+                                                    choices: roleChoices,
+                                                },
+                                            ])
+                                            .then((answers) => {
+                                                queryDB.updateEmployeeRole(answers.employeeID, answers.newRoleID)
+                                                    .then(() => {
+                                                        console.log('Employee role updated!');
+                                                        mainMenu();
+                                                    })
+                                                    .catch((error) => {
+                                                        console.error('Error updating employee role:', error);
+                                                        console.log('An error occurred. Exiting the application.');
+                                                        db.end();
+                                                    });
+                                            });
+                                    })
+                                    .catch((error) => {
+                                        console.error('Error getting roles list:', error);
+                                        console.log('An error occurred. Exiting the application.');
+                                        db.end();
+                                    });
+                            })
+                            .catch((error) => {
+                                console.error('Error getting employee list:', error);
+                                console.log('An error occurred. Exiting the application.');
+                                db.end();
+                            });
+                        break;
                 
                 case 'Exit':
                 console.log('Goodbye!');
                 db.end(); 
                 return;
             }
-
             })
             
             .catch((error) => {

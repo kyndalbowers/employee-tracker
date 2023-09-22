@@ -59,16 +59,21 @@ class Database {
         });
     }
 
-    addRole(title, salary, department_id) {
+    addRole(title, salary, departmentID) {
         return new Promise((resolve, reject) => {
-            this.db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', [title, salary, department_id], (err,result) => {
-                if (err) {
-                    return reject(err);
+            this.db.query(
+                'INSERT INTO role (title, salary, department_id, department_name) VALUES (?, ?, ?, ?)',
+                [title, salary, departmentID, null],
+                (err, result) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve(result);
                 }
-                resolve(result);
-            });
+            );
         });
     }
+    
 
     addEmployee(firstName, lastName, role_id, manager_id) {
         return new Promise((resolve, reject) => {
