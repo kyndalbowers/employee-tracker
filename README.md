@@ -10,15 +10,9 @@ SO THAT I can organize and plan my business
 
 In the integrated terminal, the application will be invoked by using the following command: 'node index.js'
 
-## Usage
+## Mock Up
 
-Provide instructions and examples for use. Include screenshots as needed.
-
-To add a screenshot, create an `assets/images` folder in your repository and upload your screenshot to it. Then, using the relative filepath, add it to your README using the following syntax:
-
-    ```md
-    ![alt text](assets/images/screenshot.png)
-    ```
+![screenshot of integrated terminal](assets/images/Screenshot.png)
 
 ## Credits
 
@@ -28,3 +22,4 @@ Class recordings from UC Berkeley/edX Zoom classes
 ## Links
 
 [Github Repository](https://github.com/kyndalbowers/employee-tracker)
+[Video Walkthrough](https://drive.google.com/file/d/1tujHGfCHDI8yGGBm6BifKSrJwDU2hQoL/view)
