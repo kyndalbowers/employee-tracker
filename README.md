@@ -21,5 +21,5 @@ Class recordings from UC Berkeley/edX Zoom classes
 
 ## Links
 
-[Github Repository](https://github.com/kyndalbowers/employee-tracker)
+[Github Repository](https://github.com/kyndalbowers/employee-tracker)<br>
 [Video Walkthrough](https://drive.google.com/file/d/1tujHGfCHDI8yGGBm6BifKSrJwDU2hQoL/view)
