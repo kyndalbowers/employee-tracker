@@ -2,8 +2,8 @@
 
 ## Description
 
-AS A business owner
-I WANT to be able to view and manage the departments, roles, and employees in my company
+AS A business owner<br>
+I WANT to be able to view and manage the departments, roles, and employees in my company<br>
 SO THAT I can organize and plan my business
 
 ## Installation
@@ -16,7 +16,7 @@ In the integrated terminal, the application will be invoked by using the followi
 
 ## Credits
 
-Class recordings from UC Berkeley/edX Zoom classes
+Class recordings from UC Berkeley/edX Zoom classes<br>
 [MySql.com](https://dev.mysql.com/) for commands and troubleshooting
 
 ## Links
